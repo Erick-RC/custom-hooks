@@ -1,38 +1,35 @@
-import React, { useEffect, useState } from "react";
-
-const CAT_ENDPOINT_RANDOM_FACT = 'https://catfact.ninja/fact';
-const CAT_PREFIX_IMAGE_URL = 'https://cataas.com/cat';
+import React from 'react';
+import { useCatImage } from './hooks/useCatImage.js';
+import { useCatFact } from './hooks/useCatFact.js';
+import { Otro } from './components/Otro.jsx';
 
 function App() {
-  const [fact, setFact] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  
+  const { fact, refreshFact } = useCatFact();
+  const { imageUrl } = useCatImage({ fact });
 
-  useEffect(() => {
-    fetch(CAT_ENDPOINT_RANDOM_FACT)
-      .then(res => res.json())
-      .then(data => {
-        const { fact } = data;
-        setFact(fact);
-      });
-  }, []);
-
-  useEffect(() =>{
-    if (!fact) return
-    const threeFirstWords = fact.split(' ', 3).join(' ');
-    fetch(`https://cataas.com/cat/says/${threeFirstWords}?size=50&color=red&json=true`)
-      .then(res => res.json())
-      .then(response => {
-        const { url } = response;
-        setImageUrl(url);
-      });
-  })
+  const handleClick = async () => {
+    refreshFact();
+  };
 
   return (
-    <main className="flex flex-col items-center font-sans">
-      <h1 className="text-3xl font-bold mb-8">App de Gatitos</h1>
-      {fact && <p className="text-lg mb-4">{fact}</p>}
-      <img className="max-w-sm rounded-lg" src={CAT_PREFIX_IMAGE_URL} alt={`Image extracted using the first three words of fact: ${fact}`} />
+    <main className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-4">App de Gatitos</h1>
+
+      <button 
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        onClick={handleClick}
+      >
+        Obtener nuevo hecho
+      </button>
+
+      {fact && (
+        <p className="text-lg my-4">{fact}</p>
+      )}
+      {imageUrl && (
+        <div className="my-4">
+          <img className="max-w-xs mx-auto" src={imageUrl} alt={`Imagen extraída utilizando las primeras tres palabras de ${fact}`} />
+        </div>
+      )}
     </main>
   );
 }
